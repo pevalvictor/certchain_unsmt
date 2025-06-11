@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Gestión de Emisores</h3>
+  <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalEmisor">
+    <i class="fa fa-user-plus me-1"></i> Registrar Emisor
+  </button>
+</div>
+
+<table class="table table-striped table-bordered table-hover" id="tablaEmisores">
+  <thead class="table-dark">
+    <tr>
+      <th>ID</th>
+      <th>Nombre Completo</th>
+      <th>Correo</th>
+      <th>Rol</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for emisor in emisores %}
+    <tr>
+      <td>{{ emisor.id }}</td>
+      <td>{{ emisor.nombre_completo }}</td>
+      <td>{{ emisor.correo }}</td>
+      <td>{{ emisor.rol }}</td>
+      <td>
+        <button class="btn btn-primary btn-sm" onclick="editarEmisor({{ emisor.id }}, '{{ emisor.nombre_completo }}', '{{ emisor.correo }}', '{{ emisor.rol }}')">
+          <i class="fa fa-edit"></i>
+        </button>
+        <a href="{{ url_for('admin.eliminar_emisor', id=emisor.id) }}" class="btn btn-danger btn-sm" onclick="return confirm('Confirma eliminar este emisor?')">
+          <i class="fa fa-trash"></i>
+        </a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Modal Registrar/Editar -->
+<div class="modal fade" id="modalEmisor" tabindex="-1" aria-labelledby="modalEmisorLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" action="{{ url_for('admin.gestionar_emisores') }}">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEmisorLabel">Registrar Emisor</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="id" id="emisor_id">
+
+          <div class="mb-3">
+            <label for="nombre_completo" class="form-label">Nombre completo</label>
+            <input type="text" class="form-control" name="nombre_completo" id="nombre_completo" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="correo" class="form-label">Correo</label>
+            <input type="email" class="form-control" name="correo" id="correo" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="rol" class="form-label">Rol</label>
+            <select class="form-select" name="rol" id="rol" required>
+              <option value="emisor">Emisor</option>
+              <option value="auditor">Auditor</option>
+            </select>
+          </div>
+
+          <div class="mb-3" id="contrasenaGroup">
+            <label for="contrasena" class="form-label">Contraseña</label>
+            <input type="password" class="form-control" name="contrasena" id="contrasena">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function editarEmisor(id, nombre, correo, rol) {
+  document.getElementById('emisor_id').value = id;
+  document.getElementById('nombre_completo').value = nombre;
+  document.getElementById('correo').value = correo;
+  document.getElementById('rol').value = rol;
+  document.getElementById('contrasenaGroup').style.display = 'none';
+  const modal = new bootstrap.Modal(document.getElementById('modalEmisor'));
+  modal.show();
+}
+</script>
+
+{% endblock %}

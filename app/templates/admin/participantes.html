@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% block title %}Gestionar Participantes{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Gestión de Participantes</h2>
+    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalParticipante">
+      <i class="fa fa-user-plus"></i> Registrar Participante
+    </button>
+  </div>
+
+  <form method="get" class="row row-cols-1 row-cols-md-auto g-2 align-items-end mb-3">
+    <div class="col">
+      <label class="form-label mb-0" for="nombre">Nombre</label>
+      <input type="text" name="nombre" id="nombre" class="form-control form-control-sm" value="{{ nombre }}">
+    </div>
+    <div class="col">
+      <label class="form-label mb-0" for="dni">DNI</label>
+      <input type="text" name="dni" id="dni" class="form-control form-control-sm" value="{{ dni }}">
+    </div>
+    <div class="col">
+      <label class="form-label mb-0" for="per_page">Por página</label>
+      <select name="per_page" id="per_page" class="form-select form-select-sm">
+        <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
+        <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+        <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+      </select>
+    </div>
+    <div class="col d-flex gap-2">
+      <button type="submit" class="btn btn-sm btn-primary">Filtrar</button>
+      <a href="{{ url_for('admin.gestionar_participantes') }}" class="btn btn-sm btn-secondary">Limpiar</a>
+    </div>
+  </form>
+
+  <div class="table-responsive bg-white shadow-sm rounded p-3">
+    <table class="table table-bordered align-middle mb-0">
+      <thead class="table-light text-center">
+        <tr>
+          <th>Foto</th>
+          <th>Nombre</th>
+          <th>DNI</th>
+          <th>Correo</th>
+          <th>Teléfono</th>
+          <th>Curso</th>
+          <th>Fecha</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in participantes %}
+        <tr>
+          <td class="text-center">
+            {% if p.foto_nombre %}
+              <img src="{{ url_for('static', filename='fotos_participantes/' ~ p.foto_nombre) }}" class="rounded" width="40">
+            {% else %}
+              <span class="text-muted">Sin foto</span>
+            {% endif %}
+          </td>
+          <td>{{ p.nombre_completo }}</td>
+          <td>{{ p.dni }}</td>
+          <td>{{ p.correo }}</td>
+          <td>{{ p.celular or '—' }}</td>
+          <td>
+            {% if p.cursos %}
+              {{ p.cursos | map(attribute='nombre') | join(', ') }}
+            {% else %}
+              <span class="text-muted">No asociado</span>
+            {% endif %}
+          </td>
+          <td>{{ p.fecha_registro.strftime('%d/%m/%Y') }}</td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-warning" onclick="editarParticipante({{ p.id }})">
+              <i class="fa fa-edit"></i>
+            </button>
+            <form method="POST" action="{{ url_for('admin.eliminar_participante', id=p.id) }}" style="display:inline;">
+              <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Eliminar participante?')">
+                <i class="fa fa-trash"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="text-center text-muted">No se encontraron participantes.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if paginacion.pages > 1 %}
+  <div class="d-flex justify-content-end mt-3">
+    <nav>
+      <ul class="pagination pagination-sm mb-0">
+        {% if paginacion.has_prev %}
+        <li class="page-item">
+          <a class="page-link" href="{{ url_for('admin.gestionar_participantes', page=paginacion.prev_num, nombre=nombre, dni=dni, per_page=per_page) }}">Anterior</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+        {% endif %}
+
+        <li class="page-item disabled">
+          <span class="page-link">Página {{ paginacion.page }} de {{ paginacion.pages }}</span>
+        </li>
+
+        {% if paginacion.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="{{ url_for('admin.gestionar_participantes', page=paginacion.next_num, nombre=nombre, dni=dni, per_page=per_page) }}">Siguiente</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+  {% endif %}
+
+  <!-- Modal Participante -->
+  <div class="modal fade" id="modalParticipante" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <form method="POST" action="{{ url_for('admin.registrar_participante') }}" enctype="multipart/form-data" id="formParticipante">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">Registrar Participante</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" name="id" id="participanteId">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Nombre completo</label>
+                <input type="text" class="form-control" name="nombre_completo" id="nombre_completo" required>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">DNI</label>
+                <input type="text" class="form-control" name="dni" id="dni_modal" required>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Teléfono</label>
+                <input type="text" class="form-control" name="celular" id="celular">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Correo</label>
+                <input type="email" class="form-control" name="correo" id="correo" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Curso</label>
+                <select class="form-select" name="curso_id" id="curso" required>
+                  <option value="">-- Seleccionar curso --</option>
+                  {% for c in cursos %}
+                    <option value="{{ c.id }}">{{ c.nombre }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label">Foto</label>
+                <input type="file" class="form-control" name="foto" id="foto">
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-success">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function editarParticipante(id) {
+  fetch(`/admin/participantes/obtener/${id}`)
+    .then(res => res.json())
+    .then(data => {
+      document.querySelector("#modalParticipante .modal-title").textContent = "Editar Participante";
+      document.getElementById("formParticipante").action = `/admin/participantes/editar/${id}`;
+      document.getElementById("nombre_completo").value = data.nombre_completo;
+      document.getElementById("dni_modal").value = data.dni;
+      document.getElementById("correo").value = data.correo;
+      document.getElementById("celular").value = data.celular || '';
+      document.getElementById("curso").value = data.curso_id;
+
+      new bootstrap.Modal(document.getElementById("modalParticipante")).show();
+    })
+    .catch(error => console.error('Error cargando participante:', error));
+}
+</script>
+{% endblock %}

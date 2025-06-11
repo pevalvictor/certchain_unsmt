@@ -1,0 +1,87 @@
+{% extends "base_simple.html" %}
+{% block title %}Verificación Pública{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="text-center mb-4">
+    <h2 class="fw-bold">Verificación Pública de Certificados</h2>
+    <p class="text-muted">Valida tu certificado por archivo PDF o mediante tu DNI</p>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <i class="fa-solid fa-file-pdf me-2"></i> Subir Certificado
+        </div>
+        <div class="card-body">
+          <form action="{{ url_for('certs.verificacion_publica') }}" method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label for="archivo" class="form-label">Archivo PDF</label>
+              <input type="file" class="form-control" name="archivo" accept=".pdf" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Verificar por Archivo</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white">
+          <i class="fa-solid fa-id-card me-2"></i> Buscar por DNI
+        </div>
+        <div class="card-body">
+          <form method="GET" action="{{ url_for('certs.verificacion_publica') }}">
+            <div class="mb-3">
+              <label for="dni" class="form-label">DNI</label>
+              <input type="text" class="form-control" name="dni" placeholder="Ingrese DNI" required>
+            </div>
+            <button type="submit" class="btn btn-secondary">Buscar por DNI</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if mensaje %}
+    <div class="alert alert-info text-center mt-4">{{ mensaje }}</div>
+  {% endif %}
+
+  {% if resultado %}
+  <div class="card mt-4 shadow-sm">
+    <div class="card-body">
+      <h5 class="mb-3 text-success"><i class="fa fa-check-circle me-2"></i> Certificado válido</h5>
+      <p><strong>Participante:</strong> {{ resultado.nombre_participante }}</p>
+      <p><strong>Evento:</strong> {{ resultado.nombre_evento }}</p>
+      <p><strong>Duración:</strong> {{ resultado.duracion_horas }} horas</p>
+      <p><strong>Emitido por:</strong> {{ resultado.emisor.nombre_completo if resultado.emisor else 'N/A' }}</p>
+      <a href="{{ url_for('certs.descargar_certificado', token=resultado.token_descarga) }}"
+        class="btn btn-sm btn-outline-primary" target="_blank">
+        <i class="fa-solid fa-download me-1"></i> Descargar
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if certificados and certificados|length > 0 %}
+  <div class="card mt-4 shadow-sm">
+    <div class="card-body">
+      <h5 class="mb-3 text-primary"><i class="fa-solid fa-list me-2"></i> Certificados asociados al DNI</h5>
+      <ul class="list-group">
+        {% for c in certificados %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <strong>{{ c.nombre_evento }}</strong> - {{ c.duracion_horas }} horas
+          </div>
+          <a href="{{ url_for('certs.descargar_certificado', token=c.token_descarga) }}" class="btn btn-sm btn-outline-primary" target="_blank">
+            <i class="fa-solid fa-download"></i> Descargar
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

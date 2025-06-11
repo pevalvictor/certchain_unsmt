@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0">Gestión de Usuarios</h2>
+  <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalUsuario">
+    <i class="fas fa-user-plus me-1"></i> Nuevo Usuario
+  </button>
+</div>
+
+<!-- Tabla de usuarios -->
+<div class="table-responsive">
+  <table class="table table-bordered table-hover table-striped align-middle" id="tabla-usuarios">
+    <thead class="table-dark">
+      <tr>
+        <th>Nombre</th>
+        <th>Correo</th>
+        <th>Rol</th>
+        <th>Estado</th>
+        <th class="text-center">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in usuarios %}
+      <tr>
+        <td>{{ u.nombre_completo }}</td>
+        <td>{{ u.correo }}</td>
+        <td>{{ u.rol | capitalize }}</td>
+        <td>
+          {% if u.activo %}
+            <span class="badge bg-success">Activo</span>
+          {% else %}
+            <span class="badge bg-secondary">Inactivo</span>
+          {% endif %}
+        </td>
+        <td class="text-center">
+          <button class="btn btn-sm btn-warning" onclick="editarUsuario({{ u.id }}, '{{ u.nombre_completo }}', '{{ u.correo }}', '{{ u.rol }}')">
+            <i class="fas fa-edit"></i>
+          </button>
+          <a href="{{ url_for('admin.eliminar_usuario', id=u.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar este usuario?')">
+            <i class="fas fa-trash"></i>
+          </a>
+          <a href="{{ url_for('admin.activar_usuario' if not u.activo else 'admin.desactivar_usuario', id=u.id) }}" class="btn btn-sm btn-secondary">
+            {% if u.activo %}
+              <i class="fas fa-user-slash"></i>
+            {% else %}
+              <i class="fas fa-user-check"></i>
+            {% endif %}
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal usuario -->
+<div class="modal fade" id="modalUsuario" tabindex="-1" aria-labelledby="modalUsuarioLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalUsuarioLabel">Registrar Usuario</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="id" id="usuarioId">
+
+          <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre completo</label>
+            <input type="text" class="form-control" name="nombre" id="nombre" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="correo" class="form-label">Correo institucional</label>
+            <input type="email" class="form-control" name="correo" id="correo" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="contrasena" class="form-label">Contraseña</label>
+            <input type="password" class="form-control" name="contrasena" id="contrasena">
+            <div class="form-text">Rellena solo si deseas modificarla.</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="rol" class="form-label">Rol</label>
+            <select name="rol" id="rol" class="form-select" required>
+              <option value="">-- Seleccionar rol --</option>
+              <option value="emisor">Emisor</option>
+              <option value="auditor">Auditor</option>
+              <option value="admin">Administrador</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  $(document).ready(function () {
+    $('#tabla-usuarios').DataTable({
+      responsive: true,
+      language: {
+        url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
+      }
+    });
+  });
+
+  function editarUsuario(id, nombre, correo, rol) {
+    $('#usuarioId').val(id);
+    $('#nombre').val(nombre);
+    $('#correo').val(correo);
+    $('#rol').val(rol);
+    $('#contrasena').val('');
+    $('#modalUsuarioLabel').text('Editar Usuario');
+    var modal = new bootstrap.Modal(document.getElementById('modalUsuario'));
+    modal.show();
+  }
+</script>
+{% endblock %}

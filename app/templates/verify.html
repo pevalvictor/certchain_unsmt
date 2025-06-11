@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>Verificación de Certificado</h2>
+  <form method="POST" enctype="multipart/form-data">
+    <label for="archivo">Sube el certificado en PDF:</label>
+    <input type="file" name="archivo" accept=".pdf" required>
+    <button type="submit">Verificar</button>
+  </form>
+
+  {% if mensaje %}
+    <hr>
+    <p><strong>{{ mensaje }}</strong></p>
+
+    {% if resultado %}
+      <ul>
+        <li><strong>Nombre:</strong> {{ resultado.nombre_participante }}</li>
+        <li><strong>Evento:</strong> {{ resultado.nombre_evento }}</li>
+        <li><strong>Duración:</strong> {{ resultado.duracion_horas }} horas</li>
+        <li><strong>Fecha:</strong> {{ resultado.fecha_emision.strftime('%d/%m/%Y') }}</li>
+        <li><strong>Emitido por:</strong> {{ resultado.emisor_id }}</li>
+      </ul>
+    {% endif %}
+  {% endif %}
+{% endblock %}

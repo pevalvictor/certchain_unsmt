@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Verificar Certificado{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="card shadow">
+    <div class="card-header bg-primary text-white">
+      <h5><i class="fa-solid fa-search me-2"></i> Verificar Certificado</h5>
+    </div>
+    <div class="card-body">
+      <form method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label for="archivo" class="form-label">Subir PDF del certificado</label>
+          <input type="file" class="form-control" name="archivo" accept=".pdf" required>
+        </div>
+        <button type="submit" class="btn btn-primary">
+          <i class="fa-solid fa-magnifying-glass me-1"></i> Verificar
+        </button>
+      </form>
+    </div>
+  </div>
+
+  {% if mensaje %}
+    <div class="alert alert-info text-center mt-4">{{ mensaje }}</div>
+  {% endif %}
+
+  {% if resultado %}
+  <div class="card mt-4 shadow">
+    <div class="card-body">
+      <h5 class="text-success"><i class="fa fa-check-circle me-2"></i> Certificado válido</h5>
+      <p><strong>Participante:</strong> {{ resultado.nombre_participante }}</p>
+      <p><strong>Evento:</strong> {{ resultado.nombre_evento }}</p>
+      <p><strong>Duración:</strong> {{ resultado.duracion_horas }} horas</p>
+      <p><strong>Correo:</strong> {{ resultado.correo_destino }}</p>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

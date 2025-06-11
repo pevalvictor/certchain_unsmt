@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}Emitir Certificado{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white d-flex align-items-center">
+      <i class="fa-solid fa-file-circle-plus me-2"></i>
+      <h5 class="mb-0">Emitir Certificado</h5>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('certs.emitir_certificado') }}" enctype="multipart/form-data">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="buscar-dni" class="form-label">Buscar por DNI</label>
+            <div class="input-group">
+              <input type="text" class="form-control" id="buscar-dni" placeholder="Ingrese DNI">
+              <button class="btn btn-outline-secondary" type="button" onclick="buscarPorDni()">Buscar</button>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label for="nombre_participante" class="form-label">Nombre del Participante</label>
+            <input type="text" class="form-control" id="nombre_participante" name="nombre" readonly>
+            <input type="hidden" id="participante_id" name="participante_id">
+          </div>
+          <div class="col-md-6">
+            <label for="correo_participante" class="form-label">Correo</label>
+            <input type="email" class="form-control" id="correo_participante" name="correo" readonly>
+          </div>
+          <div class="col-md-6">
+            <label for="curso_id" class="form-label">Curso</label>
+            <select name="curso_id" id="curso_id" class="form-select" required onchange="actualizarDuracion()">
+              <option value="">-- Seleccionar --</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label for="duracion" class="form-label">Duración (horas)</label>
+            <input type="text" class="form-control" id="duracion" name="horas" readonly>
+          </div>
+          <div class="col-md-12">
+            <label for="archivo" class="form-label">Archivo PDF del Certificado</label>
+            <input type="file" class="form-control" name="archivo" accept=".pdf" required>
+          </div>
+        </div>
+        <div class="mt-4 d-flex justify-content-between">
+          <a href="{{ url_for('certs.dashboard') }}" class="btn btn-secondary">
+            <i class="fa fa-arrow-left me-1"></i> Cancelar
+          </a>
+          <button type="submit" class="btn btn-primary">
+            <i class="fa fa-paper-plane me-1"></i> Emitir Certificado
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Buscar participante por DNI
+  function buscarPorDni() {
+    const dni = document.getElementById('buscar-dni').value;
+    fetch(`/admin/certificados/buscar_participante?dni=${dni}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          alert('Participante no encontrado');
+          return;
+        }
+
+        document.getElementById('participante_id').value = data.id;
+        document.getElementById('nombre_participante').value = data.nombre;
+        document.getElementById('correo_participante').value = data.correo;
+
+        const cursoSelect = document.getElementById('curso_id');
+        cursoSelect.innerHTML = '<option value="">-- Seleccionar --</option>';
+
+        if (data.cursos && data.cursos.length > 0) {
+          data.cursos.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = c.nombre;
+            opt.dataset.duracion = c.duracion;
+            cursoSelect.appendChild(opt);
+          });
+        } else {
+          alert('El participante no está asociado a ningún curso.');
+        }
+      });
+  }
+
+  // Al seleccionar un curso, actualizar la duración
+  document.addEventListener('DOMContentLoaded', function () {
+    const selectCurso = document.getElementById("curso_id");
+    const duracionInput = document.getElementById("duracion");
+
+    if (selectCurso) {
+      selectCurso.addEventListener("change", function () {
+        const selectedOption = selectCurso.options[selectCurso.selectedIndex];
+        const duracion = selectedOption.dataset.duracion || '';
+        duracionInput.value = duracion;
+      });
+    }
+  });
+</script>
+{% endblock %}

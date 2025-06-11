@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Historial de Certificados Emitidos</h2>
+
+<div class="table-responsive">
+  <table id="tabla-certificados" class="display nowrap" style="width:100%">
+    <thead>
+      <tr>
+        <th>Participante</th>
+        <th>Evento</th>
+        <th>Horas</th>
+        <th>Fecha de Emisión</th>
+        <th>Archivo</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for cert in certificados %}
+      <tr>
+        <td>{{ cert.nombre_participante }}</td>
+        <td>{{ cert.nombre_evento }}</td>
+        <td>{{ cert.duracion_horas }}</td>
+        <td>{{ cert.fecha_emision.strftime('%d/%m/%Y') }}</td>
+        <td>
+          <a href="{{ url_for('static', filename='uploads/' ~ cert.archivo_nombre) }}" target="_blank">Ver PDF</a>
+        </td>
+        <td>
+          <button class="btn btn-sm btn-info" onclick="verDetalle({{ cert.id }})">Detalles</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal de Detalle -->
+<div id="modalDetalle" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="cerrarModal()">&times;</span>
+    <h3>Detalle del Certificado</h3>
+    <div id="detalleContenido"></div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+<script>
+  $(document).ready(function () {
+    $('#tabla-certificados').DataTable({
+      responsive: true,
+      dom: 'Bfrtip',
+      buttons: ['excelHtml5', 'pdfHtml5', 'print'],
+      language: {
+        url: '//cdn.datatables.net/plug-ins/1.13.5/i18n/es-ES.json'
+      }
+    });
+  });
+
+  function verDetalle(id) {
+    fetch(`/certificado/detalle/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        const html = `
+          <p><strong>Participante:</strong> ${data.nombre_participante}</p>
+          <p><strong>Evento:</strong> ${data.nombre_evento}</p>
+          <p><strong>Horas:</strong> ${data.duracion_horas}</p>
+          <p><strong>Fecha de emisión:</strong> ${data.fecha_emision}</p>
+          <p><strong>Hash:</strong> ${data.archivo_hash}</p>
+        `;
+        document.getElementById('detalleContenido').innerHTML = html;
+        document.getElementById('modalDetalle').style.display = 'block';
+      });
+  }
+
+  function cerrarModal() {
+    document.getElementById('modalDetalle').style.display = 'none';
+  }
+</script>
+{% endblock %}

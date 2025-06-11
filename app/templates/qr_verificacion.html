@@ -1,0 +1,42 @@
+{% extends "base_simple.html" %}
+{% block title %}Verificación por QR{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} text-center" role="alert">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% if certificado %}
+    <div class="card shadow border-0">
+      <div class="card-header bg-success text-white d-flex align-items-center">
+        <i class="fa-solid fa-shield-check me-2"></i>
+        <h5 class="mb-0">Certificado verificado correctamente</h5>
+      </div>
+      <div class="card-body">
+        <p><strong>Participante:</strong> {{ certificado.nombre_participante }}</p>
+        <p><strong>Evento:</strong> {{ certificado.nombre_evento }}</p>
+        <p><strong>Duración:</strong> {{ certificado.duracion_horas }} horas</p>
+        <p><strong>Emitido por:</strong> {{ certificado.emisor.nombre_completo if certificado.emisor else 'N/A' }}</p>
+        <p><strong>Fecha de Emisión:</strong> {{ certificado.fecha_emision.strftime('%d/%m/%Y') }}</p>
+        <a href="{{ url_for('certs.descargar_certificado', token=certificado.token_descarga) }}" class="btn btn-success">
+          <i class="fa fa-download me-1"></i> Descargar Certificado
+        </a>
+
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-danger text-center mt-4">
+      No se pudo verificar el certificado. El enlace podría estar roto o haber expirado.
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

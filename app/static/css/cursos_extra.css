@@ -1,0 +1,56 @@
+
+/* Modal  cursos*/
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+  background: #fff;
+  margin: 5% auto;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+}
+
+.close {
+  float: right;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.btn-registrar {
+  background-color: #004080;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.tabla-cursos {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-cursos th, .tabla-cursos td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ccc;
+}
+
+.btn-editar, .btn-eliminar {
+  padding: 4px 10px;
+  border-radius: 4px;
+  text-decoration: none;
+  color: white;
+}
+
+.btn-editar { background-color: #f0ad4e; }
+.btn-eliminar { background-color: #d9534f; }

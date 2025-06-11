@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Lista de Participantes</h2>
+
+<div class="tabla-responsive">
+  <table class="tabla-estilo">
+    <thead>
+      <tr>
+        <th>Foto</th>
+        <th>Nombre</th>
+        <th>DNI</th>
+        <th>Correo</th>
+        <th>Teléfono</th>
+        <th>Curso</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in participantes %}
+      <tr>
+        <td><img src="{{ url_for('static', filename='fotos_participantes/' ~ p.foto) }}" alt="Foto de {{ p.nombre }}" width="60" height="60" style="border-radius: 50%; object-fit: cover;"></td>
+        <td>{{ p.nombre }}</td>
+        <td>{{ p.dni }}</td>
+        <td>{{ p.correo }}</td>
+        <td>{{ p.telefono }}</td>
+        <td>{{ p.curso.nombre }}</td>
+        <td>
+            <button class="btn-editar" data-bs-toggle="modal" data-bs-target="#modalEditarParticipante"
+                onclick="cargarDatosParticipante({{ p.id }})">
+                  Editar
+            </button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+    <div id="modal-editar" class="modal">
+        <div class="modal-contenido">
+            <span class="cerrar" onclick="cerrarModal()">&times;</span>
+            <h3>Editar Participante</h3>
+            <form id="form-editar" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="id" id="editar-id">
+            <label>Nombre:</label>
+            <input type="text" name="nombre" id="editar-nombre" required>
+
+            <label>DNI:</label>
+            <input type="text" name="dni" id="editar-dni" required>
+
+            <label>Correo:</label>
+            <input type="email" name="correo" id="editar-correo" required>
+
+            <label>Teléfono:</label>
+            <input type="text" name="telefono" id="editar-telefono">
+
+            <label>Curso:</label>
+            <select name="curso_id" id="editar-curso" required>
+                {% for curso in cursos %}
+                <option value="{{ curso.id }}">{{ curso.nombre }}</option>
+                {% endfor %}
+            </select>
+
+            <label>Actualizar Foto (opcional):</label>
+            <input type="file" name="foto">
+
+            <button type="submit">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- Modal de edición de participante -->
+<div class="modal fade" id="modalEditarParticipante" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form id="formEditarParticipante" method="POST" enctype="multipart/form-data">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEditarLabel">Editar Participante</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body row g-3">
+          <input type="hidden" id="participante_id" name="participante_id">
+
+          <div class="col-md-6">
+            <label for="nombres" class="form-label">Nombres</label>
+            <input type="text" class="form-control" id="nombres" name="nombres" required>
+          </div>
+
+          <div class="col-md-6">
+            <label for="apellidos" class="form-label">Apellidos</label>
+            <input type="text" class="form-control" id="apellidos" name="apellidos" required>
+          </div>
+
+          <div class="col-md-4">
+            <label for="dni" class="form-label">DNI</label>
+            <input type="text" class="form-control" id="dni" name="dni" required>
+          </div>
+
+          <div class="col-md-4">
+            <label for="telefono" class="form-label">Teléfono</label>
+            <input type="text" class="form-control" id="telefono" name="telefono">
+          </div>
+
+          <div class="col-md-4">
+            <label for="correo" class="form-label">Correo</label>
+            <input type="email" class="form-control" id="correo" name="correo" required>
+          </div>
+
+          <div class="col-md-12">
+            <label for="curso_id" class="form-label">Curso Asignado</label>
+            <select class="form-select" id="curso_id" name="curso_id" required>
+              <option value="">Seleccionar curso</option>
+              {% for curso in cursos %}
+              <option value="{{ curso.id }}">{{ curso.nombre }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-12">
+            <label for="foto" class="form-label">Foto (opcional)</label>
+            <input class="form-control" type="file" id="foto" name="foto">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+
+<script>
+  function cargarDatosParticipante(id) {
+    fetch(`/participantes/${id}/json`)
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('participante_id').value = data.id;
+        document.getElementById('nombres').value = data.nombres;
+        document.getElementById('apellidos').value = data.apellidos;
+        document.getElementById('dni').value = data.dni;
+        document.getElementById('correo').value = data.correo;
+        document.getElementById('telefono').value = data.telefono;
+        document.getElementById('curso_id').value = data.curso_id;
+      })
+      .catch(error => {
+        console.error("Error al cargar datos del participante:", error);
+      });
+  }
+</script>
+
+<script>
+function cargarDatosParticipante(id) {
+  fetch(`/participantes/obtener/${id}`)
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('editar-id').value = data.id;
+      document.getElementById('editar-nombre').value = data.nombre;
+      document.getElementById('editar-dni').value = data.dni;
+      document.getElementById('editar-correo').value = data.correo;
+      document.getElementById('editar-telefono').value = data.telefono;
+      document.getElementById('editar-curso').value = data.curso_id;
+
+      document.getElementById('modal-editar').style.display = 'block';
+    });
+}
+
+function cerrarModal() {
+  document.getElementById('modal-editar').style.display = 'none';
+}
+</script>

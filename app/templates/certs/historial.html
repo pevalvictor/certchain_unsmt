@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Historial de Certificados{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h2 class="mb-4 fw-bold">Historial de Certificados Emitidos</h2>
+  <!-- Filtros superiores -->
+<form method="get" class="row row-cols-1 row-cols-md-auto g-2 align-items-end mb-3">
+  <div class="col">
+    <label for="nombre" class="form-label mb-0">Participante</label>
+    <input type="text" name="nombre" id="nombre" class="form-control form-control-sm" value="{{ nombre }}">
+  </div>
+  <div class="col">
+    <label for="evento" class="form-label mb-0">Evento</label>
+    <input type="text" name="evento" id="evento" class="form-control form-control-sm" value="{{ evento }}">
+  </div>
+  <div class="col">
+    <label for="fecha_inicio" class="form-label mb-0">Desde</label>
+    <input type="date" name="fecha_inicio" id="fecha_inicio" class="form-control form-control-sm" value="{{ fecha_inicio }}">
+  </div>
+  <div class="col">
+    <label for="fecha_fin" class="form-label mb-0">Hasta</label>
+    <input type="date" name="fecha_fin" id="fecha_fin" class="form-control form-control-sm" value="{{ fecha_fin }}">
+  </div>
+  <div class="col">
+    <label for="per_page" class="form-label mb-0">Por página</label>
+    <select name="per_page" id="per_page" class="form-select form-select-sm">
+      <option value="5" {% if per_page == 5 %}selected{% endif %}>5</option>
+      <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+      <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+    </select>
+  </div>
+  <div class="col d-flex gap-2">
+    <button type="submit" class="btn btn-sm btn-primary">Filtrar</button>
+    <a href="{{ url_for('certs.historial_certificados') }}" class="btn btn-sm btn-secondary">Limpiar</a>
+  </div>
+</form>
+
+<!-- Tabla -->
+<div class="table-responsive bg-white shadow-sm rounded p-3 mb-2">
+  <table class="table table-bordered table-hover align-middle mb-0">
+    <thead class="table-light">
+      <tr>
+        <th>#</th>
+        <th>Participante</th>
+        <th>Evento</th>
+        <th>Horas</th>
+        <th>Fecha de Emisión</th>
+        <th>Archivo</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for cert in certificados %}
+      <tr>
+        <td>{{ loop.index + ((paginacion.page - 1) * paginacion.per_page) }}</td>
+        <td>{{ cert.nombre_participante }}</td>
+        <td>{{ cert.nombre_evento }}</td>
+        <td>{{ cert.duracion_horas }}</td>
+        <td>{{ cert.fecha_emision.strftime('%d/%m/%Y') }}</td>
+        <td>
+          <a href="{{ url_for('static', filename='uploads/' ~ cert.archivo_nombre) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+            <i class="fa-solid fa-file-pdf"></i> PDF
+          </a>
+        </td>
+        <td>
+          <button class="btn btn-sm btn-info" onclick="verDetalle({{ cert.id }})">
+            <i class="fa-solid fa-eye"></i> Detalle
+          </button>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="7" class="text-center text-muted">No se encontraron resultados.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Paginación alineada a la derecha -->
+{% if paginacion.pages > 1 %}
+<div class="d-flex justify-content-end">
+  <nav aria-label="Paginación" class="mt-2">
+    <ul class="pagination pagination-sm mb-0">
+      {% if paginacion.has_prev %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('certs.historial_certificados', page=paginacion.prev_num, nombre=nombre, evento=evento, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin, per_page=per_page) }}">Anterior</a>
+      </li>
+      {% else %}
+      <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+      {% endif %}
+
+      <li class="page-item disabled">
+        <span class="page-link">Página {{ paginacion.page }} de {{ paginacion.pages }}</span>
+      </li>
+
+      {% if paginacion.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="{{ url_for('certs.historial_certificados', page=paginacion.next_num, nombre=nombre, evento=evento, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin, per_page=per_page) }}">Siguiente</a>
+      </li>
+      {% else %}
+      <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+{% endif %}
+
+  
+</div>
+
+<!-- Modal Detalle -->
+<div class="modal fade" id="modalDetalle" tabindex="-1" aria-labelledby="detalleLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="detalleLabel">Detalle del Certificado</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" id="detalleContenido">
+        <p class="text-center text-muted">Cargando datos...</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function verDetalle(id) {
+    fetch(/certificado/detalle/${id})
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          document.getElementById('detalleContenido').innerHTML = <div class="alert alert-danger">${data.error}</div>;
+          return;
+        }
+        const html = `
+          <p><strong>Participante:</strong> ${data.nombre_participante}</p>
+          <p><strong>Evento:</strong> ${data.nombre_evento}</p>
+          <p><strong>Duración:</strong> ${data.duracion_horas} horas</p>
+          <p><strong>Fecha de emisión:</strong> ${data.fecha_emision}</p>
+          <p><strong>Hash:</strong> <code>${data.archivo_hash}</code></p>
+          <p><strong>Correo:</strong> ${data.correo_destino || 'N/A'}</p>
+          <p><strong>IP Descarga:</strong> ${data.ip_descarga || 'N/A'}</p>
+          <p><strong>Fecha Descarga:</strong> ${data.fecha_descarga || 'No descargado'}</p>
+        `;
+        document.getElementById('detalleContenido').innerHTML = html;
+        new bootstrap.Modal(document.getElementById('modalDetalle')).show();
+      })
+      .catch(err => {
+        document.getElementById('detalleContenido').innerHTML = <div class="alert alert-warning">Error al cargar detalle.</div>;
+        new bootstrap.Modal(document.getElementById('modalDetalle')).show();
+      });
+  }
+</script>
+{% endblock %}

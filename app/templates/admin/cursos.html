@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% block title %}Cursos{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="mb-0">Gestión de Cursos</h2>
+  <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalRegistrar">
+    <i class="fas fa-plus"></i> Registrar Curso
+  </button>
+</div>
+
+<div class="table-responsive">
+  <table id="tabla-cursos" class="table table-bordered table-hover">
+    <thead class="table-dark">
+      <tr>
+        <th>ID</th>
+        <th>Nombre</th>
+        <th>Tipo</th>
+        <th>Fecha</th>
+        <th>Horas</th>
+        <th>Responsable</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in cursos %}
+      <tr>
+        <td>{{ c.id }}</td>
+        <td>{{ c.nombre }}</td>
+        <td>{{ c.tipo }}</td>
+        <td>{{ c.fecha_inicio.strftime('%d/%m/%Y') }} - {{ c.fecha_fin.strftime('%d/%m/%Y') }}</td>
+        <td>{{ c.duracion_horas }}</td>
+        <td>{{ c.responsable_firma }}</td>
+        <td>
+          {% if c.estado == 'activo' %}
+            <span class="badge bg-success">Activo</span>
+          {% else %}
+            <span class="badge bg-secondary">Inactivo</span>
+          {% endif %}
+        </td>
+        <td>
+          <button class="btn btn-warning btn-sm" onclick="cargarEditar({{ c.id }})" data-bs-toggle="modal" data-bs-target="#modalEditar">
+            <i class="fas fa-pen-to-square"></i>
+          </button>
+          <form method="POST" action="{{ url_for('admin.eliminar_curso', id=c.id) }}" class="d-inline">
+            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Confirmar eliminación')">
+              <i class="fas fa-trash"></i>
+            </button>
+          </form>
+          <a href="{{ url_for('admin.toggle_estado_curso', id=c.id) }}" class="btn btn-sm btn-secondary">
+            {% if c.estado == 'activo' %}
+              <i class="fas fa-toggle-on"></i>
+            {% else %}
+              <i class="fas fa-toggle-off"></i>
+            {% endif %}
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal Registrar -->
+<div class="modal fade" id="modalRegistrar" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <form method="POST" action="{{ url_for('admin.gestionar_cursos') }}">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Registrar Curso</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body row g-3">
+          <div class="col-md-6">
+            <label>Nombre</label>
+            <input type="text" name="nombre" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label>Tipo</label>
+            <input type="text" name="tipo" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label>Fecha de inicio</label>
+            <input type="date" name="fecha_inicio" class="form-control" required>
+          </div>
+          <div class="col-md-6">
+            <label>Fecha de fin</label>
+            <input type="date" name="fecha_fin" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label>Horas</label>
+            <input type="number" name="duracion_horas" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label>Responsable de firma</label>
+            <input type="text" name="responsable_firma" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label>Cargo del responsable</label>
+            <input type="text" name="cargo_responsable" class="form-control" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- Modal Editar -->
+<div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <form method="POST" id="formEditarCurso">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Curso</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="edit_id">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label>Nombre</label>
+              <input type="text" name="nombre" id="edit_nombre" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <label>Tipo</label>
+              <input type="text" name="tipo" id="edit_tipo" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <label>Fecha de inicio</label>
+              <input type="date" name="fecha_inicio" id="edit_fecha_inicio" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <label>Fecha de fin</label>
+              <input type="date" name="fecha_fin" id="edit_fecha_fin" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+              <label>Horas</label>
+              <input type="number" name="duracion_horas" id="edit_horas" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+              <label>Responsable de firma</label>
+              <input type="text" name="responsable_firma" id="edit_responsable" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+              <label>Cargo del responsable</label>
+              <input type="text" name="cargo_responsable" id="edit_cargo" class="form-control" required>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function cargarEditar(id) {
+    fetch(`/admin/cursos/obtener/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("formEditarCurso").action = `/admin/cursos/editar/${id}`;
+        document.getElementById("edit_nombre").value = data.nombre;
+        document.getElementById("edit_tipo").value = data.tipo;
+        document.getElementById("edit_fecha_inicio").value = data.fecha_inicio;
+        document.getElementById("edit_fecha_fin").value = data.fecha_fin;
+        document.getElementById("edit_horas").value = data.duracion_horas;
+        document.getElementById("edit_responsable").value = data.responsable_firma;
+        document.getElementById("edit_cargo").value = data.cargo_responsable;
+      });
+  }
+</script>
+{% endblock %}

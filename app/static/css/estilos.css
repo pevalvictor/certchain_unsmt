@@ -1,0 +1,110 @@
+/* Base */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow-x: hidden;
+}
+
+.wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background-color: #0069d9;
+  color: white;
+  flex-shrink: 0;
+  transition: all 0.3s ease-in-out;
+  z-index: 999;
+}
+
+.sidebar.collapsed {
+  transform: translateX(-100%);
+}
+
+.sidebar .nav-link {
+  color: white;
+  padding: 12px 20px;
+  display: block;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  background-color: #0250a3;
+}
+
+/* Main */
+.main-content {
+  transition: margin-left 0.3s;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  flex-grow: 1;
+}
+
+.alert {
+  z-index: 9999;
+  position: relative;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #666;
+  padding-top: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    transform: translateX(0);
+  }
+
+  .sidebar.collapsed {
+    transform: translateX(-250px);
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
+}
+
+
+/* Para el modal de detaller de auditoria*/
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1050;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 1.5rem;
+  border: 1px solid #888;
+  width: 90%;
+  max-width: 500px;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.modal .close {
+  float: right;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+}
