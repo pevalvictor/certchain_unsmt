@@ -92,9 +92,29 @@ python run.py
 
 > **Nota:** esta versión del repositorio es un prototipo académico y puede requerir ajustes de configuración y dependencias antes de instalarse desde cero. No está preparada para despliegue público.
 
-## 📸 Capturas
+## 📸 Capturas del prototipo
 
-Las capturas del inicio de sesión, panel principal y módulos operativos podrán incorporarse en `docs/screenshots/` una vez revisadas para evitar exponer datos personales. No se incluyen imágenes simuladas de funcionalidades pendientes.
+Las siguientes pantallas muestran la interfaz desarrollada. Su visualización no implica que todos los flujos funcionales estén terminados.
+
+### Panel principal del administrador
+
+Vista general del dashboard con accesos a certificados, usuarios, cursos, participantes y auditoría.
+
+![Panel principal de CertChain UNSM](docs/screenshots/01-dashboard.png)
+
+### Formulario de emisión de certificados
+
+Interfaz para buscar participantes, seleccionar cursos y adjuntar un certificado PDF. El flujo completo de emisión todavía requiere validación.
+
+![Formulario de emisión de certificados](docs/screenshots/02-emision-certificado.png)
+
+### Gestión de cursos
+
+Pantalla de administración de cursos con listado, estado y acciones disponibles. Los datos mostrados son ilustrativos del entorno de prueba.
+
+![Módulo de gestión de cursos](docs/screenshots/03-gestion-cursos.png)
+
+> Las imágenes se almacenan en `docs/screenshots/`. No se presentan como evidencia de que el proyecto esté listo para producción.
 
 ## 🗺️ Próximos pasos
 
